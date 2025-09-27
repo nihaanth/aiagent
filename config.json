@@ -26,52 +26,98 @@
                 "model": "gpt-4o-mini",
                 "temperature": 0.7
             },
-            "prompt": "You are a professional pharmacy assistant. You can: 1) Get drug info with get_drug_info, 2) Place orders with place_order, 3) Look up orders with lookup_order. IMPORTANT: Always ask users to spell out their full name clearly when placing orders. Confirm all order details before processing - including customer name, drug name, and quantity. Be thorough and professional in collecting information. If a user provides a name that's unclear, ask them to spell it out letter by letter. Always confirm the complete order details before finalizing any transaction.",
+            "prompt": "You are Dr. Claude AI, a helpful medical assistant. You can: 1) Assess symptoms and provide medical guidance with assess_symptoms, 2) Provide medication information with get_medication_info, 3) Schedule appointments with schedule_appointment, 4) Check appointment status with check_appointment, 5) Give health tips with get_health_tips, 6) Provide emergency guidance with emergency_guidance. IMPORTANT: Always remind users that this is for informational purposes only and not a substitute for professional medical advice. For emergencies, always direct users to call 911. Be empathetic and professional in your responses.",
             "functions": [
               {
-                "name": "get_drug_info",
-                "description": "Get detailed information about a specific drug. Use this function when: A customer asks about drug information, side effects, or pricing. A customer wants to know what a medication does. A customer asks questions like 'What is aspirin?' or 'Tell me about ibuprofen'. A customer wants to know drug prices or descriptions. Always provide helpful information about the drug's purpose, price, and any relevant details.",
+                "name": "assess_symptoms",
+                "description": "Assess patient symptoms and provide medical guidance. Use this when: A patient describes symptoms like headache, fever, cough, pain, etc. Someone asks 'What could be wrong with me?' or describes feeling unwell. Always remind that this is for informational purposes only.",
                 "parameters": {
                   "type": "object",
                   "properties": {
-                    "drug_name": {
+                    "symptoms": {
                       "type": "string",
-                      "description": "Name of the drug to look up. Convert to lowercase for matching. Examples: 'aspirin', 'ibuprofen', 'acetaminophen'"
+                      "description": "Description of the patient's symptoms. Include all relevant details about what they're experiencing."
                     }
                   },
-                  "required": ["drug_name"]
+                  "required": ["symptoms"]
                 }
               },
               {
-                "name": "place_order",
-                "description": "Place a new prescription order for a customer. Use this function when: A customer wants to order medication. A customer asks to refill a prescription. A customer says 'I need to order' or 'Can I get some'. Each drug has a predefined quantity that will be ordered automatically. Before placing an order: Verify the drug exists using get_drug_info. Get the customer's name for the order. Always confirm the order details before processing.",
+                "name": "get_medication_info",
+                "description": "Get information about medications including uses, dosage, and warnings. Use this when: A patient asks about a specific medication. Someone wants to know side effects or proper dosage. Always emphasize consulting healthcare providers.",
                 "parameters": {
                   "type": "object",
                   "properties": {
-                    "customer_name": {
+                    "medication_name": {
                       "type": "string",
-                      "description": "Customer's full name for the order. Use as provided by the customer."
+                      "description": "Name of the medication to look up (e.g., 'acetaminophen', 'ibuprofen', 'aspirin')"
+                    }
+                  },
+                  "required": ["medication_name"]
+                }
+              },
+              {
+                "name": "schedule_appointment",
+                "description": "Schedule a medical appointment. Use this when: A patient wants to book an appointment. Someone asks to see the doctor. A patient needs to schedule a consultation or follow-up.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "patient_name": {
+                      "type": "string",
+                      "description": "Patient's full name for the appointment"
                     },
-                    "drug_name": {
+                    "reason": {
                       "type": "string",
-                      "description": "Name of the drug to order. Convert to lowercase for matching. Must be a valid drug in our system. Examples: 'aspirin', 'metformin', 'lisinopril', 'atorvastatin', 'omeprazole'"
+                      "description": "Reason for the appointment (e.g., 'annual checkup', 'flu symptoms', 'follow-up')"
+                    },
+                    "preferred_date": {
+                      "type": "string",
+                      "description": "Preferred date and time (optional, defaults to next available)"
                     }
                   },
-                  "required": ["customer_name", "drug_name"]
+                  "required": ["patient_name", "reason"]
                 }
               },
               {
-                "name": "lookup_order",
-                "description": "Look up an existing order by its ID. Use this function when: A customer asks about a specific order. A customer wants to check order status. A customer says 'Where is my order' or 'Check order number'. A customer provides an order ID number. Always verify the order exists and provide clear information about the order details.",
+                "name": "check_appointment",
+                "description": "Check the status of an existing appointment. Use this when: A patient asks about their appointment. Someone wants to confirm appointment details. A patient provides an appointment ID.",
                 "parameters": {
                   "type": "object",
                   "properties": {
-                    "order_id": {
-                      "type": "integer",
-                      "description": "The order ID number to look up. Must be a valid order number in our system."
+                    "appointment_id": {
+                      "type": "string",
+                      "description": "The appointment ID number to check"
                     }
                   },
-                  "required": ["order_id"]
+                  "required": ["appointment_id"]
+                }
+              },
+              {
+                "name": "get_health_tips",
+                "description": "Provide health tips and wellness advice. Use this when: A patient asks for health advice. Someone wants tips for staying healthy. A patient asks about nutrition, exercise, or mental health.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "category": {
+                      "type": "string",
+                      "description": "Category of health tips: 'general', 'nutrition', 'exercise', or 'mental_health'"
+                    }
+                  },
+                  "required": ["category"]
+                }
+              },
+              {
+                "name": "emergency_guidance",
+                "description": "Provide emergency guidance and when to seek immediate care. Use this when: A patient describes emergency symptoms. Someone asks about serious conditions. A patient needs immediate medical guidance. ALWAYS emphasize calling 911 for emergencies.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "emergency_type": {
+                      "type": "string",
+                      "description": "Type of emergency: 'chest_pain', 'difficulty_breathing', 'severe_bleeding', 'poisoning', 'allergic_reaction'"
+                    }
+                  },
+                  "required": ["emergency_type"]
                 }
               }
             ]
@@ -82,6 +128,6 @@
                 "model": "aura-2-thalia-en"
             }
         },
-        "greeting": "Hello! I'm your pharmacy assistant. I can help you with drug information, placing orders, and checking order status. When placing orders, I'll need your full name spelled out clearly and will confirm all details with you. How can I assist you today?"
+        "greeting": "Hello! I'm Dr. Claude AI, your medical assistant. I can help you with: symptom assessment, medication information, appointment scheduling, health tips, and emergency guidance. Please remember that I provide general medical information for educational purposes only and am not a substitute for professional medical advice. For emergencies, please call 911 immediately. How can I help you today?"
     }
 }

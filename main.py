@@ -5,7 +5,8 @@ import json
 import ssl
 import websockets
 import os
-from pharma_functions import FUNCTION_MAP
+from medical_functions import FUNCTION_MAP
+from mobile_bridge import mobile_bridge, start_mobile_server
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -42,13 +43,13 @@ async def handle_barge_in(decoded,twilio_ws,streamsid):
         await twilio_ws.send(json.dumps(clear_message))
 
 
-def execute_function_call(func_name,argunments):
+def execute_function_call(func_name,arguments):
     if func_name in FUNCTION_MAP:
-        result = FUNCTION_MAP[func_name](**argunments)
+        result = FUNCTION_MAP[func_name](**arguments)
         print(f'function called if {result}')
         return result
     else:
-        result = {'error :{func_name}'}
+        result = {'error': f'Function {func_name} not found'}
         print(result)
         return result
 
@@ -64,18 +65,21 @@ def create_function_call_response(func_id,fund_name,result):
 async def handle_function_call_request(decoded,sts_ws):
     try:
 
-        for function_call in decoded['function']:
+        for function_call in decoded['functions']:
             func_name = function_call['name']
             func_id = function_call['id']
-            arguments = json.loads(function_call['argunments'])
+            arguments = json.loads(function_call['arguments'])
 
-            print(f'function called : {func_name} {func_id} {argunments}')
+            print(f'function called : {func_name} {func_id} {arguments}')
 
-            result = execute_function_call(func_name,argunments) 
+            result = execute_function_call(func_name,arguments) 
             function_result = create_function_call_response(func_id,func_name,result)
 
             await sts_ws.send(json.dumps(function_result))
-            print(f'sending the function result :{function_results}')
+            print(f'sending the function result :{function_result}')
+            
+            # Send to mobile app
+            await mobile_bridge.handle_function_call(func_name, arguments, result)
     except Exception as e:
         print(f'error {e}')
         error_result = create_function_call_response(
@@ -92,7 +96,7 @@ async def handle_text_message(decoded,twilio_ws,sts_ws,streamsid):
     # checking if deepgram require function call or not
 
     if decoded['type'] == 'FunctionCallRequest':
-        await handle_function_call_request(decided,sts_ws)
+        await handle_function_call_request(decoded,sts_ws)
 
 
 
@@ -109,8 +113,32 @@ async def sts_receiver(sts_ws,twilio_ws,streamsid_queue):#receive everything fro
 
     async for message in sts_ws:
         if type(message) is str:
-            print(message)
             decoded = json.loads(message)
+            
+            # Filter out unwanted message types to reduce noise
+            message_type = decoded.get('type', '')
+            if message_type in ['History', 'Metadata', 'AgentThinking']:
+                continue  # Skip these message types
+                
+            print(f"🎧 Deepgram message: {message}")
+            
+            # Send transcription to mobile app
+            if decoded.get('type') == 'UtteranceEnd':
+                transcript = decoded.get('speech_final', '')
+                if transcript:
+                    print(f"✅ Final transcript: '{transcript}'")
+                    await mobile_bridge.handle_transcription(transcript, is_final=True)
+            elif decoded.get('type') == 'SpeechStarted':
+                print(f"🎤 User started speaking")
+                await mobile_bridge.handle_transcription("User started speaking...", is_final=False)
+            
+            # Send agent responses to mobile app  
+            if decoded.get('type') == 'AgentAudioDone':
+                response_text = decoded.get('text', '')
+                if response_text:
+                    print(f"🤖 Agent response: '{response_text}'")
+                    await mobile_bridge.handle_agent_response(response_text)
+            
             await handle_text_message(decoded,twilio_ws,sts_ws,streamsid)
             continue
 
@@ -194,9 +222,19 @@ async def twilio_handler(twilio_ws):
 
 
 async def main():
-    await websockets.serve(twilio_handler,'localhost',5000)
-    print('server started')
-    await asyncio.Future()
+    # Start both servers concurrently
+    twilio_server = await websockets.serve(twilio_handler,'localhost',5000)
+    mobile_server = await start_mobile_server()
+    
+    print('Twilio server started on port 5000')
+    print('Mobile WebSocket server started on port 8080')
+    print('Pharmacy Assistant is ready!')
+    
+    # Keep both servers running
+    await asyncio.gather(
+        twilio_server.wait_closed(),
+        mobile_server.wait_closed()
+    )
 
 
 if __name__ == '__main__':
