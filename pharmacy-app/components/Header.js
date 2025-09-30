@@ -2,15 +2,19 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Appbar, Title } from 'react-native-paper';
 
-const Header = () => {
+const Header = ({ onViewHistory }) => {
   return (
     <Appbar.Header style={styles.header}>
-      <View style={styles.headerContent}>
-        <Appbar.Content 
-          title="🩺 Dr. Claude AI" 
-          titleStyle={styles.title}
-        />
-      </View>
+      <Appbar.Content
+        title="Dr. Claude AI"
+        titleStyle={styles.title}
+      />
+      <Appbar.Action
+        icon="history"
+        iconColor="#FFFFFF"
+        onPress={onViewHistory}
+        accessibilityLabel="View conversation history"
+      />
     </Appbar.Header>
   );
 };

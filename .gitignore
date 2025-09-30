@@ -4,7 +4,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
-
+node_modules
 # Python
 __pycache__/
 *.py[cod]
@@ -80,3 +80,5 @@ uploads/
 
 # Twilio recovery codes
 *recovery_code*.txt
+node_modules
+

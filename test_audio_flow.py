@@ -11,13 +11,13 @@ import websockets
 
 async def test_audio_flow():
     try:
-        print("🔗 Connecting to mobile bridge at ws://localhost:8080...")
+        print("Connecting to mobile bridge at ws://localhost:8080...")
         
         async with websockets.connect("ws://localhost:8080") as websocket:
-            print("✅ Connected successfully!")
+            print("Connected successfully!")
             
             # Simulate recording start
-            print("📤 Sending recording start...")
+            print("Sending recording start...")
             await websocket.send(json.dumps({
                 "event": "recording_started",
                 "timestamp": "2024-01-01T12:00:00Z"
@@ -25,7 +25,7 @@ async def test_audio_flow():
             
             # Simulate audio chunks
             for i in range(3):
-                print(f"📤 Sending audio chunk {i+1}/3...")
+                print(f"Sending audio chunk {i+1}/3...")
                 
                 # Create fake audio data (just some bytes)
                 fake_audio = b"fake_audio_data_" + str(i).encode() * 100
@@ -44,36 +44,36 @@ async def test_audio_flow():
                 # Listen for any responses
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=0.5)
-                    print(f"📥 Received response: {response}")
+                    print(f"Received response: {response}")
                 except asyncio.TimeoutError:
                     pass
             
             # Simulate recording stop
-            print("📤 Sending recording stop...")
+            print("Sending recording stop...")
             await websocket.send(json.dumps({
                 "event": "recording_stopped",
                 "timestamp": "2024-01-01T12:00:00Z"
             }))
             
             # Listen for final responses
-            print("👂 Listening for final responses...")
+            print("Listening for final responses...")
             try:
                 for _ in range(5):  # Try to get up to 5 messages
                     response = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                     parsed = json.loads(response)
-                    print(f"📥 Received: {parsed.get('event', 'unknown')} - {parsed.get('text', parsed.get('message', 'no text'))}")
+                    print(f"Received: {parsed.get('event', 'unknown')} - {parsed.get('text', parsed.get('message', 'no text'))}")
             except asyncio.TimeoutError:
-                print("⏰ No more responses")
+                print("No more responses")
                 
-            print("🏁 Audio flow test completed")
+            print("Audio flow test completed")
             
     except ConnectionRefusedError:
-        print("❌ Connection refused - is the backend running?")
+        print("Connection refused - is the backend running?")
         print("   Try: python main.py")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
-    print("🧪 Audio Flow Test")
+    print("Audio Flow Test")
     print("=" * 40)
     asyncio.run(test_audio_flow())

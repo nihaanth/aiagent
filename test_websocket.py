@@ -10,10 +10,10 @@ import websockets
 
 async def test_websocket_connection():
     try:
-        print("🔗 Connecting to mobile bridge at ws://localhost:8080...")
+        print("Connecting to mobile bridge at ws://localhost:8080...")
         
         async with websockets.connect("ws://localhost:8080") as websocket:
-            print("✅ Connected successfully!")
+            print("Connected successfully!")
             
             # Send a test message
             test_message = {
@@ -22,22 +22,22 @@ async def test_websocket_connection():
                 "timestamp": "2024-01-01T12:00:00Z"
             }
             
-            print(f"📤 Sending test message: {test_message}")
+            print(f"Sending test message: {test_message}")
             await websocket.send(json.dumps(test_message))
             
             # Send ping
             ping_message = {"command": "ping"}
-            print(f"📤 Sending ping: {ping_message}")
+            print(f"Sending ping: {ping_message}")
             await websocket.send(json.dumps(ping_message))
             
             # Listen for responses
-            print("👂 Listening for responses...")
+            print("Listening for responses...")
             
             timeout_count = 0
             while timeout_count < 5:  # Listen for 5 seconds
                 try:
                     message = await asyncio.wait_for(websocket.recv(), timeout=1.0)
-                    print(f"📥 Received: {message}")
+                    print(f"Received: {message}")
                     
                     # Parse and display nicely
                     try:
@@ -50,17 +50,17 @@ async def test_websocket_connection():
                         
                 except asyncio.TimeoutError:
                     timeout_count += 1
-                    print(f"⏰ Timeout {timeout_count}/5")
+                    print(f"Timeout {timeout_count}/5")
                     
-            print("🏁 Test completed")
+            print("Test completed")
             
     except ConnectionRefusedError:
-        print("❌ Connection refused - is the backend running?")
+        print("Connection refused - is the backend running?")
         print("   Try: python main.py")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
-    print("🧪 WebSocket Connectivity Test")
+    print("WebSocket Connectivity Test")
     print("=" * 40)
     asyncio.run(test_websocket_connection())
