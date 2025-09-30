@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "babel-plugin-module-resolver": "^5.0.2",
+    "react-native-reanimated": "^4.1.2"
+  },
+  "dependencies": {
+    "react-native-url-polyfill": "^3.0.0",
+    "whatwg-url-without-unicode": "^8.0.0-3"
+  }
+}

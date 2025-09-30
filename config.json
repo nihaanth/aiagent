@@ -128,6 +128,6 @@
                 "model": "aura-2-thalia-en"
             }
         },
-        "greeting": "Hello! I'm Dr. Claude AI, your medical assistant. I can help you with: symptom assessment, medication information, appointment scheduling, health tips, and emergency guidance. Please remember that I provide general medical information for educational purposes only and am not a substitute for professional medical advice. For emergencies, please call 911 immediately. How can I help you today?"
+        "greeting": "Hello! I'm Dr."
     }
 }

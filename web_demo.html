@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Claude AI - Medical Agent Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: #2E7D32;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .status {
+            padding: 15px;
+            background: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+        }
+        .status.connected {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.disconnected {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .chat-section, .history-section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .button {
+            background: #2E7D32;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .button:hover {
+            background: #1b5e20;
+        }
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .button.secondary {
+            background: #666;
+        }
+        .button.secondary:hover {
+            background: #555;
+        }
+        .message-area {
+            height: 200px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .conversation {
+            margin-top: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .message.user {
+            background: #2E7D32;
+            color: white;
+            margin-left: 20px;
+        }
+        .message.agent {
+            background: #e3f2fd;
+            color: #1976d2;
+            margin-right: 20px;
+        }
+        .function-call {
+            background: #fff3e0;
+            border: 1px solid #ffb74d;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .function-name {
+            font-weight: bold;
+            color: #e65100;
+        }
+        .timestamp {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        .error {
+            color: #c62828;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #2e7d32;
+            background: #e8f5e9;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Dr. Claude AI - Medical Agent</h1>
+            <p>WebSocket Demo & Conversation History</p>
+        </div>
+
+        <div id="status" class="status disconnected">
+            🔴 Disconnected from server
+        </div>
+
+        <!-- Chat Section -->
+        <div class="chat-section">
+            <h2>💬 Live Chat</h2>
+            <div class="input-group">
+                <label for="messageInput">Message to Dr. Claude:</label>
+                <input type="text" id="messageInput" placeholder="E.g., Hello doctor, I have a headache and feel dizzy">
+            </div>
+            <button class="button" onclick="sendMessage()" id="sendBtn" disabled>Send Message</button>
+            <button class="button secondary" onclick="clearChat()">Clear Chat</button>
+
+            <div class="message-area" id="chatArea">Welcome to Dr. Claude AI!\nConnecting to server...</div>
+        </div>
+
+        <!-- History Section -->
+        <div class="history-section">
+            <h2>📋 Conversation History</h2>
+            <p>Retrieve your past conversations using your phone number and 6-digit passcode.</p>
+
+            <div class="input-group">
+                <label for="phoneInput">Phone Number:</label>
+                <input type="tel" id="phoneInput" placeholder="(555) 123-4567 or +15551234567" value="+15551234567">
+            </div>
+
+            <div class="input-group">
+                <label for="passcodeInput">6-Digit Passcode:</label>
+                <input type="password" id="passcodeInput" placeholder="123456" value="996476" maxlength="6">
+            </div>
+
+            <button class="button" onclick="fetchHistory()" id="historyBtn" disabled>Retrieve History</button>
+            <button class="button secondary" onclick="clearHistory()">Clear Display</button>
+
+            <div id="historyResult"></div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let isConnected = false;
+
+        // WebSocket connection
+        function connect() {
+            try {
+                ws = new WebSocket('ws://localhost:9001');
+
+                ws.onopen = function() {
+                    isConnected = true;
+                    updateStatus('🟢 Connected to Dr. Claude AI', 'connected');
+                    document.getElementById('sendBtn').disabled = false;
+                    document.getElementById('historyBtn').disabled = false;
+                    addToChat('System: Connected to Dr. Claude AI server');
+                };
+
+                ws.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleServerMessage(data);
+                    } catch (e) {
+                        addToChat('Raw message: ' + event.data);
+                    }
+                };
+
+                ws.onclose = function() {
+                    isConnected = false;
+                    updateStatus('🔴 Disconnected from server', 'disconnected');
+                    document.getElementById('sendBtn').disabled = true;
+                    document.getElementById('historyBtn').disabled = true;
+                    addToChat('System: Disconnected from server');
+
+                    // Reconnect after 3 seconds
+                    setTimeout(connect, 3000);
+                };
+
+                ws.onerror = function(error) {
+                    addToChat('Connection error: ' + error);
+                };
+
+            } catch (e) {
+                addToChat('Failed to connect: ' + e.message);
+                setTimeout(connect, 5000);
+            }
+        }
+
+        function updateStatus(text, className) {
+            const status = document.getElementById('status');
+            status.textContent = text;
+            status.className = 'status ' + className;
+        }
+
+        function addToChat(message) {
+            const chatArea = document.getElementById('chatArea');
+            const timestamp = new Date().toLocaleTimeString();
+            chatArea.textContent += `[${timestamp}] ${message}\n`;
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function handleServerMessage(data) {
+            switch (data.event) {
+                case 'connection_established':
+                    addToChat('✅ ' + data.message);
+                    break;
+                case 'agent_response':
+                    addToChat('🤖 Dr. Claude: ' + data.text);
+                    break;
+                case 'function_call':
+                    addToChat('🔧 Function: ' + data.function_name + ' - ' + JSON.stringify(data.parameters));
+                    break;
+                case 'history':
+                    displayHistory(data.history);
+                    break;
+                case 'history_error':
+                    showError('History Error: ' + data.message);
+                    break;
+                default:
+                    addToChat('📨 ' + data.event + ': ' + JSON.stringify(data));
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (message && isConnected) {
+                const data = {
+                    event: 'user_message',
+                    message: message,
+                    timestamp: new Date().toISOString()
+                };
+
+                ws.send(JSON.stringify(data));
+                addToChat('👤 You: ' + message);
+                input.value = '';
+            }
+        }
+
+        function fetchHistory() {
+            const phone = document.getElementById('phoneInput').value.trim();
+            const passcode = document.getElementById('passcodeInput').value.trim();
+
+            if (!phone || !passcode) {
+                showError('Please enter both phone number and passcode');
+                return;
+            }
+
+            if (passcode.length !== 6 || !/^\d{6}$/.test(passcode)) {
+                showError('Passcode must be exactly 6 digits');
+                return;
+            }
+
+            if (isConnected) {
+                const data = {
+                    command: 'fetch_history',
+                    phone_number: phone,
+                    passcode: passcode
+                };
+
+                ws.send(JSON.stringify(data));
+                addToChat('🔍 Requesting history for ' + phone + '...');
+            }
+        }
+
+        function displayHistory(history) {
+            const result = document.getElementById('historyResult');
+
+            let html = `
+                <div class="success">
+                    ✅ Conversation history retrieved successfully!
+                </div>
+                <div class="conversation">
+                    <h3>📋 Session Details</h3>
+                    <p><strong>Session ID:</strong> ${history.sessionId}</p>
+                    <p><strong>Username:</strong> ${history.username}</p>
+                    <p><strong>Phone:</strong> ${history.phoneNumber}</p>
+                    <p><strong>Status:</strong> ${history.status}</p>
+                    <p><strong>Date:</strong> ${new Date(history.createdAt).toLocaleString()}</p>
+                </div>
+            `;
+
+            if (history.messages && history.messages.length > 0) {
+                html += '<h3>💬 Conversation</h3>';
+                history.messages.forEach(msg => {
+                    const messageClass = msg.role === 'user' ? 'user' : 'agent';
+                    const speaker = msg.role === 'user' ? '👤 Patient' : '🤖 Dr. Claude';
+                    html += `
+                        <div class="message ${messageClass}">
+                            <strong>${speaker}:</strong><br>
+                            ${msg.text}
+                            <div class="timestamp">${new Date(msg.timestamp).toLocaleString()}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (history.functionCalls && history.functionCalls.length > 0) {
+                html += '<h3>🔧 Medical Functions Used</h3>';
+                history.functionCalls.forEach(func => {
+                    html += `
+                        <div class="function-call">
+                            <div class="function-name">📋 ${func.name}</div>
+                            <p><strong>Parameters:</strong> ${JSON.stringify(func.parameters)}</p>
+                            <p><strong>Result:</strong> ${JSON.stringify(func.result)}</p>
+                            <div class="timestamp">${new Date(func.timestamp).toLocaleString()}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            result.innerHTML = html;
+            addToChat('✅ History displayed successfully');
+        }
+
+        function showError(message) {
+            const result = document.getElementById('historyResult');
+            result.innerHTML = `<div class="error">❌ ${message}</div>`;
+            addToChat('❌ ' + message);
+        }
+
+        function clearChat() {
+            document.getElementById('chatArea').textContent = 'Chat cleared.\n';
+        }
+
+        function clearHistory() {
+            document.getElementById('historyResult').innerHTML = '';
+        }
+
+        // Enter key support
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        document.getElementById('passcodeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                fetchHistory();
+            }
+        });
+
+        // Auto-connect on page load
+        window.onload = connect;
+    </script>
+</body>
+</html>

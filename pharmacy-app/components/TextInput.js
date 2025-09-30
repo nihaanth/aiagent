@@ -24,7 +24,7 @@ const TextInput = ({ isConnected, onSendMessage }) => {
         <View style={styles.inputContainer}>
           <PaperTextInput
             mode="outlined"
-            placeholder={isConnected ? "Type your message to Dr. Claude AI..." : "Connecting..."}
+            placeholder={isConnected ? "Type your message to Dr Tips..." : "Connecting..."}
             value={message}
             onChangeText={setMessage}
             onSubmitEditing={handleSend}

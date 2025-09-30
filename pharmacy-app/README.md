@@ -66,12 +66,12 @@ npx expo start
 
 ### Pharmacy Functions Supported
 
-- 💊 **get_drug_info**: Get comprehensive drug information
-- 📋 **place_order**: Place medication orders
-- 🔍 **lookup_order**: Check order status
-- ⚠️ **check_drug_interactions**: Drug interaction checking
-- 🔄 **get_drug_alternatives**: Find alternative medications
-- 📄 **check_prescription_status**: Track prescription status
+- **get_drug_info**: Get comprehensive drug information
+- **place_order**: Place medication orders
+- **lookup_order**: Check order status
+- **check_drug_interactions**: Drug interaction checking
+- **get_drug_alternatives**: Find alternative medications
+- **check_prescription_status**: Track prescription status
 
 ## Architecture
 

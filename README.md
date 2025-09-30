@@ -150,8 +150,32 @@ TWILIO_PHONE_NUMBER=your_twilio_phone_number
 # Server configuration
 SERVER_PORT=8000
 NGROK_URL=https://your-ngrok-url.ngrok.io
+<<<<<<< HEAD
 ```
 
+=======
+TWILIO_WS_PORT=5001
+MOBILE_WS_PORT=8080
+
+# MongoDB (optional, for conversation history persistence)
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net
+MONGODB_DB_NAME=agent
+```
+
+### 6. Conversation History Persistence (Optional)
+
+If you want to store and retrieve call transcripts:
+
+1. Provision a MongoDB instance (e.g. MongoDB Atlas) and create a database user.
+2. Add `MONGODB_URI` (connection string) and optional `MONGODB_DB_NAME` to your `.env` file.
+3. On each call, the backend generates a six-digit passcode and links it with the caller’s phone number and stream ID. Connected mobile clients receive a `session_started` event with these details.
+4. Mobile clients can later request the transcript by sending a WebSocket command:
+   ```json
+   { "command": "fetch_history", "phone_number": "+15551234567", "passcode": "123456", "session_id": "optional-stream-sid" }
+   ```
+   The server verifies the passcode and returns the stored messages, agent replies, and function calls.
+
+>>>>>>> 5a9dab17 (Adding voice conservation to mangodb database and showing that in the app after disconnecting the call)
 ## Running the Complete System
 
 1. **Start the Python backend:**

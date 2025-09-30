@@ -10,7 +10,7 @@ const ConnectionStatus = ({ isConnected }) => {
         style={styles.connectedBanner}
         icon="check-circle"
       >
-        <Text style={styles.connectedText}>Connected to Dr. Claude AI</Text>
+        <Text style={styles.connectedText}>Connected to Dr Tips</Text>
       </Banner>
     );
   }
@@ -22,7 +22,7 @@ const ConnectionStatus = ({ isConnected }) => {
       icon="alert-circle"
     >
       <Text style={styles.disconnectedText}>
-        Connecting to Dr. Claude AI...
+        Connecting to Dr Tips...
       </Text>
     </Banner>
   );

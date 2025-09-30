@@ -1,24 +1,47 @@
 {
   "expo": {
+    "experiments": {
+      "turboModules": false,
+      "newArchEnabled": false,
+      "tsconfigPaths": false,
+      "typedRoutes": false
+    },
     "name": "Dr. Claude AI",
     "slug": "doctor-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "scheme": "doctor-app",
+    "platforms": ["ios", "android", "web"],
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.medical.doctor-app",
+      "newArchEnabled": false,
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "This app needs access to microphone to record voice for medical consultation with Dr. Claude AI."
+        "NSMicrophoneUsageDescription": "This app needs access to microphone to record voice for medical consultation with Dr. Claude AI.",
+        "RCTNewArchEnabled": false,
+        "EXNewArchEnabled": false
       }
     },
     "android": {
+      "package": "com.medical.doctorapp",
+      "newArchEnabled": false,
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.INTERNET"
       ]
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [],
+    "extra": {
+      "newArchEnabled": false,
+      "turboModules": false,
+      "RCTNewArchEnabled": false
     }
   }
 }

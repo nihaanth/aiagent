@@ -21,20 +21,18 @@ const ConversationDisplay = ({ userMessage, agentResponse, onClear }) => {
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           {userMessage ? (
             <View style={styles.messageContainer}>
-              <Text style={styles.label}>👤 You:</Text>
+              <Text style={styles.label}>You:</Text>
               <Text style={styles.userText}>{userMessage}</Text>
             </View>
           ) : (
-            <Text style={styles.placeholderText}>
-              💬 Type a message to Dr. Claude AI...
-            </Text>
+            <Text style={styles.placeholderText}>Type a message to Dr Tips...</Text>
           )}
           
           {agentResponse && (
             <>
               <Divider style={styles.divider} />
               <View style={styles.messageContainer}>
-                <Text style={styles.label}>🩺 Dr. Claude:</Text>
+                <Text style={styles.label}>Dr Tips:</Text>
                 <Text style={styles.agentText}>{agentResponse}</Text>
               </View>
             </>

@@ -15,19 +15,19 @@ const PharmacyFunctions = ({ functionCalls }) => {
   const getFunctionIcon = (functionName) => {
     switch (functionName) {
       case 'assess_symptoms':
-        return '🩺';
+        return '';
       case 'get_medication_info':
-        return '💊';
+        return '';
       case 'schedule_appointment':
-        return '📅';
+        return '';
       case 'check_appointment':
-        return '🔍';
+        return '';
       case 'get_health_tips':
-        return '💡';
+        return '';
       case 'emergency_guidance':
-        return '🚨';
+        return '';
       default:
-        return '🔧';
+        return '';
     }
   };
 
@@ -63,7 +63,7 @@ const PharmacyFunctions = ({ functionCalls }) => {
         <Card.Content>
           <Text style={styles.title}>Function Calls</Text>
           <Text style={styles.placeholderText}>
-            Medical functions will appear here when Dr. Claude AI processes your requests...
+            Medical functions will appear here when Dr Tips processes your requests...
           </Text>
         </Card.Content>
       </Card>

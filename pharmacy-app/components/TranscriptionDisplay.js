@@ -21,20 +21,18 @@ const TranscriptionDisplay = ({ transcription, agentResponse, onClear }) => {
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           {transcription ? (
             <View style={styles.messageContainer}>
-              <Text style={styles.label}>👤 You:</Text>
+              <Text style={styles.label}>You:</Text>
               <Text style={styles.userText}>{transcription}</Text>
             </View>
           ) : (
-            <Text style={styles.placeholderText}>
-              🎤 Start speaking to Dr. Claude AI...
-            </Text>
+            <Text style={styles.placeholderText}>Start speaking to Dr Tips...</Text>
           )}
           
           {agentResponse && (
             <>
               <Divider style={styles.divider} />
               <View style={styles.messageContainer}>
-                <Text style={styles.label}>🩺 Dr. Claude:</Text>
+                <Text style={styles.label}>Dr Tips:</Text>
                 <Text style={styles.agentText}>{agentResponse}</Text>
               </View>
             </>
